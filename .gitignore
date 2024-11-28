@@ -1,0 +1,12 @@
+.idea
+target
+.classpath
+.project
+.settings
+.editorconfig
+.m2
+build.properties
+bin
+.metadata
+transaction.log
+*.iml
