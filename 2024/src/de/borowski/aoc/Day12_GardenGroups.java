@@ -31,7 +31,6 @@ public class Day12_GardenGroups {
                     int regionArea = previousUnvisitedArea - unvisitedArea;
                     fencePrice += borderCount * regionArea;
                     previousUnvisitedArea = unvisitedArea;
-                    // System.out.println(fencePrice);
                 }
             }
         }
@@ -83,13 +82,6 @@ public class Day12_GardenGroups {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private int[] convertToIntegerArray(String line) {
-        int length = line.length();
-        int[] ba = new int[length];
-        for (int i=0; i<length; i++) ba[i] = Integer.parseInt(line.substring(i, i+1));
-        return ba;
     }
 
     public static void main(String[] args) {
