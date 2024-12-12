@@ -4,18 +4,19 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
-public class Day11_GardenGroups {
-    int size =4;
+public class Day12_GardenGroups_Part2 {
+    int size =5;
     int previousUnvisitedArea = size * size;
-    String filename = "/home/christoph/Projects/IdeaProjects/AdventOfCode/2024/input/input_day11_testset.txt";
-    //String filename = "/home/christoph/Projects/IdeaProjects/AdventOfCode/2024/input/input_day11_testset1.txt";
-    //String filename = "/home/christoph/Projects/IdeaProjects/AdventOfCode/2024/input/input_day11_testset2.txt";
-    //String filename = "/home/christoph/Projects/IdeaProjects/AdventOfCode/2024/input/input_day11.txt";
+    //String filename = "/home/christoph/Projects/IdeaProjects/AdventOfCode/2024/input/input_day12_testset.txt";
+    String filename = "/home/christoph/Projects/IdeaProjects/AdventOfCode/2024/input/input_day12_testset1.txt";
+    //String filename = "/home/christoph/Projects/IdeaProjects/AdventOfCode/2024/input/input_day12_testset2.txt";
+    //String filename = "/home/christoph/Projects/IdeaProjects/AdventOfCode/2024/input/input_day12.txt";
 
     private final char[][] map = new char[size][size];
     private final boolean[][] visited = new boolean[size][size];
+    private boolean[][] visited2;
 
-    public Day11_GardenGroups() {
+    public Day12_GardenGroups_Part2() {
         readInput();
         System.out.println("--------------------------------");
         System.out.println(computeFencePrice());
@@ -26,16 +27,64 @@ public class Day11_GardenGroups {
         for (int y = 0; y< map.length; y++) {
             for (int x = 0; x< map.length; x++) {
                 if (!visited[y][x]) {
+                    visited2  = new boolean[size][size];
                     int borderCount = countBordersForRegion(y, x, map[y][x]);
+                    int sideCount = countSidesForRegion();
                     int unvisitedArea = getUnvisitedArea();
                     int regionArea = previousUnvisitedArea - unvisitedArea;
-                    fencePrice += borderCount * regionArea;
+                    // fencePrice += borderCount * regionArea; // Part 1
+                    fencePrice += sideCount * regionArea; // Part 2
                     previousUnvisitedArea = unvisitedArea;
                     // System.out.println(fencePrice);
                 }
             }
         }
         return fencePrice;
+    }
+
+    private int countSidesForRegion() {
+        int sides = 0;
+        int startIndexPrev = -1;
+        int gardenPlotsPrev = 0;
+        int startIndex, gardenPlots;
+
+        // rows
+        for (int y=0; y<size; y++) {
+            startIndex = -1;
+            gardenPlots = 0;
+            for (int x = 0; x < size; x++) {
+                if (visited2[y][x]) {
+                    gardenPlots += 1;
+                    if (startIndex == -1) startIndex = x;
+                }
+            }
+            if (startIndexPrev >= 0 && startIndexPrev != startIndex) sides++;
+            if (gardenPlots > 0 && startIndexPrev+gardenPlotsPrev != startIndex+gardenPlots) sides++;
+            startIndexPrev = startIndex;
+            gardenPlotsPrev = gardenPlots;
+        }
+        if (gardenPlotsPrev > 0 ) sides++;
+
+        // columns
+        startIndexPrev = -1;
+        gardenPlotsPrev = 0;
+        for (int x=0; x<size; x++) {
+            startIndex = -1;
+            gardenPlots = 0;
+            for (int y = 0; y < size; y++) {
+                if (visited2[y][x]) {
+                    gardenPlots += 1;
+                    if (startIndex == -1) startIndex = y;
+                }
+            }
+            if (startIndexPrev >= 0 && startIndexPrev != startIndex) sides++;
+            if (gardenPlots > 0 && startIndexPrev+gardenPlotsPrev != startIndex+gardenPlots) sides++;
+            startIndexPrev = startIndex;
+            gardenPlotsPrev = gardenPlots;
+        }
+        if (gardenPlotsPrev > 0 ) sides++;
+
+        return sides;
     }
 
     private int getUnvisitedArea() {
@@ -50,6 +99,7 @@ public class Day11_GardenGroups {
 
     private int countBordersForRegion(int y, int x, char plantType) {
         visited[y][x] = true;
+        visited2[y][x] = true;
         // compute border count
         int borderCount = computeBorderCount(y, x);
         // visit neighbors
@@ -93,6 +143,6 @@ public class Day11_GardenGroups {
     }
 
     public static void main(String[] args) {
-        new Day11_GardenGroups();
+        new Day12_GardenGroups_Part2();
     }
 }
