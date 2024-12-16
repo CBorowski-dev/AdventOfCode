@@ -5,15 +5,16 @@ import java.io.FileReader;
 import java.io.IOException;
 
 public class Day16_ReindeerMaze {
-    int size =15; // 17 141
-    String filename = "/home/christoph/Projects/IdeaProjects/AdventOfCode/2024/input/input_day16_testset.txt";
+    int size =141; // 17 141
+    // String filename = "/home/christoph/Projects/IdeaProjects/AdventOfCode/2024/input/input_day16_testset.txt";
     //String filename = "/home/christoph/Projects/IdeaProjects/AdventOfCode/2024/input/input_day16_testset2.txt";
-    //String filename = "/home/christoph/Projects/IdeaProjects/AdventOfCode/2024/input/input_day16.txt";
+    String filename = "/home/christoph/Projects/IdeaProjects/AdventOfCode/2024/input/input_day16.txt";
 
     private final char[][] maze = new char[size][size];
     private final char[][] visited = new char[size][size];
     private int rX = 0;
     private int rY = 0;
+    private int bestScore = -1;
 
     enum Direction {
         NORTH, EAST, SOUTH, WEST;
@@ -22,32 +23,41 @@ public class Day16_ReindeerMaze {
     public Day16_ReindeerMaze() {
         readInput();
         initVisited();
-        int score = moveReindeer(rY, rX, Direction.NORTH, 0);
-        int scoreN = moveReindeer(rY, rX, Direction.EAST, 0);
-        if (scoreN > score) score = scoreN;
+        moveReindeer(rY, rX, Direction.EAST, 0);
         System.out.println("--------------------------------");
-        System.out.println(score);
+        System.out.println(bestScore);
     }
 
-    private int moveReindeer(int y, int x, Direction d, int score) {
+    private void moveReindeer(int y, int x, Direction d, int score) {
+        if (maze[y][x]=='E') {
+            printMaze(score);
+            if (bestScore == -1 || bestScore > score) bestScore = score;
+        }
+        //int currentScore = -1;
+        char c = maze[y][x];
+        maze[y][x] = 'x';
         // NORTH
-        if (maze[y-1][x] != '#' && maze[y-1][x] != 'x') {
-            score = moveReindeer(y-1, x, Direction.NORTH, score + ((d.equals(Direction.NORTH)) ? 1 : 1000));
+        if (!d.equals(Direction.SOUTH) && maze[y-1][x] != '#' && maze[y-1][x] != 'x') {
+            moveReindeer(y-1, x, Direction.NORTH, score + ((d.equals(Direction.NORTH)) ? 1 : 1001));
+            //if (currentScore == -1 || currentScore > score) currentScore = score;
         }
         // EAST
-        if (maze[y][x+1] != '#' && maze[y][x+1] != 'x') {
-            score = moveReindeer(y, x+1, Direction.EAST, score + ((d.equals(Direction.EAST)) ? 1 : 1000));
+        if (!d.equals(Direction.WEST) && maze[y][x+1] != '#' && maze[y][x+1] != 'x') {
+            moveReindeer(y, x+1, Direction.EAST, score + ((d.equals(Direction.EAST)) ? 1 : 1001));
+            //if (currentScore == -1 || currentScore > score) currentScore = score;
         }
         // SOUTH
-        if (maze[y+1][x] != '#' && maze[y+1][x] != 'x') {
-            score = moveReindeer(y+1, x, Direction.SOUTH, score + ((d.equals(Direction.SOUTH)) ? 1 : 1000));
+        if (!d.equals(Direction.NORTH) && maze[y+1][x] != '#' && maze[y+1][x] != 'x') {
+            moveReindeer(y+1, x, Direction.SOUTH, score + ((d.equals(Direction.SOUTH)) ? 1 : 1001));
+            // if (currentScore == -1 || currentScore > score) currentScore = score;
         }
         // WEST
-        if (maze[y][x-1] != '#' && maze[y][x-1] != 'x') {
-            score = moveReindeer(y, x-1, Direction.WEST, score + ((d.equals(Direction.WEST)) ? 1 : 1000));
+        if (!d.equals(Direction.EAST) && maze[y][x-1] != '#' && maze[y][x-1] != 'x') {
+            moveReindeer(y, x-1, Direction.WEST, score + ((d.equals(Direction.WEST)) ? 1 : 1001));
+            //if (currentScore == -1 || currentScore > score) currentScore = score;
         }
-
-        return score;
+        maze[y][x] = c;
+        // return currentScore;
     }
 
     private void initVisited() {
@@ -56,6 +66,16 @@ public class Day16_ReindeerMaze {
                 visited[y][x] = maze[y][x];
                 if (visited[y][x]=='E' || visited[y][x]=='S') visited[y][x]='.';
             }
+        }
+    }
+
+    private void printMaze(int score) {
+        System.out.println("---------------" + score + "---------------------");
+        for (int y = 0; y< maze.length; y++) {
+            for (int x = 0; x< maze.length; x++) {
+                System.out.print(maze[y][x]);
+            }
+            System.out.println();
         }
     }
 
