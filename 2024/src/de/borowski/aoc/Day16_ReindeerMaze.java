@@ -3,17 +3,22 @@ package de.borowski.aoc;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 public class Day16_ReindeerMaze {
-    int size =141; // 17 141
-    // String filename = "/home/christoph/Projects/IdeaProjects/AdventOfCode/2024/input/input_day16_testset.txt";
-    //String filename = "/home/christoph/Projects/IdeaProjects/AdventOfCode/2024/input/input_day16_testset2.txt";
-    String filename = "/home/christoph/Projects/IdeaProjects/AdventOfCode/2024/input/input_day16.txt";
+    private final int size =17; // 15 17 141
+    //String filename = "/home/christoph/Projects/IdeaProjects/AdventOfCode/2024/input/input_day16_testset.txt";
+    String filename = "/home/christoph/Projects/IdeaProjects/AdventOfCode/2024/input/input_day16_testset2.txt";
+    //String filename = "/home/christoph/Projects/IdeaProjects/AdventOfCode/2024/input/input_day16.txt";
 
+    private final Map<Coordinate, Values> visitedNodes = new HashMap<>();
+    private final Map<Coordinate, Values> unvisitedNodes = new HashMap<>();
+    private final Map<Coordinate, Values> neighborNodes = new HashMap<>();
     private final char[][] maze = new char[size][size];
-    private int rX = 0;
-    private int rY = 0;
-    private int bestScore = 87380;
+    private int startX = 0;
+    private int startY = 0;
 
     enum Direction {
         NORTH, EAST, SOUTH, WEST;
@@ -21,51 +26,88 @@ public class Day16_ReindeerMaze {
 
     public Day16_ReindeerMaze() {
         readInput();
-        // initVisited();
-        moveReindeer(rY, rX, Direction.EAST, 0);
+        initializeUnvisitedNodes();
+        searchShortestPath(new Coordinate(startY, startX), Direction.EAST);
         System.out.println("--------------------------------");
-        System.out.println(bestScore);
+        System.out.println(visitedNodes.get(new Coordinate(1, size - 2)).pathLength);
     }
 
-    private void moveReindeer(int y, int x, Direction d, int score) {
-        if (maze[y][x]=='E') {
-            System.out.println("---------------" + score + "---------------------");
-            // printMaze(score);
-            if (bestScore == -1 || bestScore > score) bestScore = score;
-        }
-        if (score + (size-2-x + y-1) + ((x!=size-2 && y>1)?1000:0)> bestScore) return;
-        char c = maze[y][x];
-        maze[y][x] = 'x';
-
-        // EAST
-        if (!d.equals(Direction.WEST) && maze[y][x+1] != '#' && maze[y][x+1] != 'x')
-            moveReindeer(y, x+1, Direction.EAST, score + ((d.equals(Direction.EAST)) ? 1 : 1001));
-        // NORTH
-        if (!d.equals(Direction.SOUTH) && maze[y-1][x] != '#' && maze[y-1][x] != 'x')
-            moveReindeer(y-1, x, Direction.NORTH, score + ((d.equals(Direction.NORTH)) ? 1 : 1001));
-        // WEST
-        if (!d.equals(Direction.EAST) && maze[y][x-1] != '#' && maze[y][x-1] != 'x')
-            moveReindeer(y, x-1, Direction.WEST, score + ((d.equals(Direction.WEST)) ? 1 : 1001));
-        // SOUTH
-        if (!d.equals(Direction.NORTH) && maze[y+1][x] != '#' && maze[y+1][x] != 'x')
-            moveReindeer(y+1, x, Direction.SOUTH, score + ((d.equals(Direction.SOUTH)) ? 1 : 1001));
-
-        maze[y][x] = c;
+    private void searchShortestPath(Coordinate c, Direction d) {
+        Coordinate c_next;
+        Values v = new Values(0, d);
+        Values v_next;
+        do {
+            if (c.x == size-2 && c.y == 1) {
+                System.out.println("X");
+            }
+            visitedNodes.put(c, v);
+            addNeighborNodes(c, v.d, v.pathLength);
+            c_next = pickNeighborWithMinimumDistanceValue();
+            v_next = neighborNodes.remove(c_next);
+            c = c_next;
+            v = v_next;
+        } while (!unvisitedNodes.isEmpty());
     }
 
-    /* private void initVisited() {
-        for (int y = 0; y< maze.length; y++) {
-            for (int x = 0; x< maze.length; x++) {
-                visited[y][x] = maze[y][x];
-                if (visited[y][x]=='E' || visited[y][x]=='S') visited[y][x]='.';
+    private Coordinate pickNeighborWithMinimumDistanceValue() {
+        Coordinate tmpCoordinate = null;
+        int tmpPathLength = 0;
+        for (Coordinate c : neighborNodes.keySet()) {
+            Values v = neighborNodes.get(c);
+            if (tmpCoordinate==null || tmpPathLength>v.pathLength) {
+                tmpCoordinate = c;
+                tmpPathLength = v.pathLength;
             }
         }
-    }*/
+        return tmpCoordinate;
+    }
+
+    private void addNeighborNodes(Coordinate c, Direction d, int pathLength) {
+        int y = c.y;
+        int x = c.x;
+        // NORTH
+        Coordinate k = new Coordinate(y - 1, x);
+        if (maze[y-1][x] != '#' && !visitedNodes.containsKey(k)) {
+            neighborNodes.put(k, new Values(pathLength + (d.equals(Direction.NORTH) ? 1 : 1001), Direction.NORTH));
+            unvisitedNodes.remove(k);
+        }
+        // EAST
+        k = new Coordinate(y, x + 1);
+        if (maze[y][x+1] != '#' && !visitedNodes.containsKey(k)) {
+            neighborNodes.put(k, new Values(pathLength + (d.equals(Direction.EAST) ? 1 : 1001), Direction.EAST));
+            unvisitedNodes.remove(k);
+        }
+        // WEST
+        k = new Coordinate(y, x - 1);
+        if (maze[y][x-1] != '#' && !visitedNodes.containsKey(k)) {
+            neighborNodes.put(k, new Values(pathLength + (d.equals(Direction.WEST) ? 1 : 1001), Direction.WEST));
+            unvisitedNodes.remove(k);
+        }
+        // SOUTH
+        k = new Coordinate(y + 1, x);
+        if (maze[y+1][x] != '#' && !visitedNodes.containsKey(k)) {
+            neighborNodes.put(k, new Values(pathLength + (d.equals(Direction.SOUTH) ? 1 : 1001), Direction.SOUTH));
+            unvisitedNodes.remove(k);
+        }
+    }
+
+    private void initializeUnvisitedNodes() {
+        for (int y = 1; y<size-1; y++) {
+            for (int x = 1; x<size-1; x++) {
+                if (maze[y][x] == '.' || maze[y][x] == 'E') {
+                    if (x == size-2 && y == 1) {
+                        System.out.println("X");
+                    }
+                    unvisitedNodes.put(new Coordinate(y, x), new Values(-1, null));
+                }
+            }
+        }
+    }
 
     private void printMaze(int score) {
-        for (int y = 0; y< maze.length; y++) {
-            for (int x = 0; x< maze.length; x++) {
-                System.out.print(maze[y][x]);
+        for (char[] chars : maze) {
+            for (int x = 0; x < maze.length; x++) {
+                System.out.print(chars[x]);
             }
             System.out.println();
         }
@@ -81,8 +123,8 @@ public class Day16_ReindeerMaze {
                 if (row < size) {
                     maze[row] = line.toCharArray();
                     if (line.indexOf('S')>0) {
-                        rX = line.indexOf('S');
-                        rY = row;
+                        startX = line.indexOf('S');
+                        startY = row;
                     }
                     row++;
                 }
@@ -92,6 +134,41 @@ public class Day16_ReindeerMaze {
             reader.close();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private static class Values {
+        int pathLength;
+        Direction d;
+
+        public Values(int pathLength, Direction d) {
+            this.pathLength = pathLength;
+            this.d = d;
+        }
+    }
+
+    private static class Coordinate {
+        int x, y;
+
+        public Coordinate(int y, int x) {
+            this.x = x;
+            this.y = y;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == null || getClass() != o.getClass()) return false;
+            Coordinate that = (Coordinate) o;
+            return x == that.x && y == that.y;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(x, y);
+        }
+
+        public Coordinate minus(Coordinate c) {
+            return new Coordinate(y-c.y, x-c.x);
         }
     }
 
