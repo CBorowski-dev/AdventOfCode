@@ -8,10 +8,10 @@ import java.util.Map;
 import java.util.Objects;
 
 public class Day16_ReindeerMaze {
-    private final int size =17; // 15 17 141
+    private final int size =141; // 15 17 141
     //String filename = "/home/christoph/Projects/IdeaProjects/AdventOfCode/2024/input/input_day16_testset.txt";
-    String filename = "/home/christoph/Projects/IdeaProjects/AdventOfCode/2024/input/input_day16_testset2.txt";
-    //String filename = "/home/christoph/Projects/IdeaProjects/AdventOfCode/2024/input/input_day16.txt";
+    //String filename = "/home/christoph/Projects/IdeaProjects/AdventOfCode/2024/input/input_day16_testset2.txt";
+    String filename = "/home/christoph/Projects/IdeaProjects/AdventOfCode/2024/input/input_day16.txt";
 
     private final Map<Coordinate, Values> visitedNodes = new HashMap<>();
     private final Map<Coordinate, Values> unvisitedNodes = new HashMap<>();
@@ -36,16 +36,14 @@ public class Day16_ReindeerMaze {
         Coordinate c_next;
         Values v = new Values(0, d);
         Values v_next;
+        visitedNodes.put(c, v);
         do {
-            if (c.x == size-2 && c.y == 1) {
-                System.out.println("X");
-            }
-            visitedNodes.put(c, v);
             addNeighborNodes(c, v.d, v.pathLength);
             c_next = pickNeighborWithMinimumDistanceValue();
             v_next = neighborNodes.remove(c_next);
             c = c_next;
             v = v_next;
+            visitedNodes.put(c, v);
         } while (!unvisitedNodes.isEmpty());
     }
 
@@ -95,21 +93,9 @@ public class Day16_ReindeerMaze {
         for (int y = 1; y<size-1; y++) {
             for (int x = 1; x<size-1; x++) {
                 if (maze[y][x] == '.' || maze[y][x] == 'E') {
-                    if (x == size-2 && y == 1) {
-                        System.out.println("X");
-                    }
                     unvisitedNodes.put(new Coordinate(y, x), new Values(-1, null));
                 }
             }
-        }
-    }
-
-    private void printMaze(int score) {
-        for (char[] chars : maze) {
-            for (int x = 0; x < maze.length; x++) {
-                System.out.print(chars[x]);
-            }
-            System.out.println();
         }
     }
 
