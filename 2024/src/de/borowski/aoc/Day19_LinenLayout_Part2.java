@@ -36,12 +36,9 @@ public class Day19_LinenLayout_Part2 {
 
     private int getPossibleDesigns() {
         int count = 0;
-        int designCount = 0;
         for (String d : designs) {
-            System.out.println(designCount++);
             if (isDesignPossible(d.toCharArray(), 0)) count++;
         }
-        //if (isDesignPossible(designs.get(0).toCharArray(), 0)) count++;
         return count;
     }
 
