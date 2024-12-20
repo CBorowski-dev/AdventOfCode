@@ -5,13 +5,13 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
-public class Day09_XYZ {
+public class Day09_DiskFragmenter {
     // String filename = "/home/christoph/Projects/IdeaProjects/AdventOfCode/2024/input/input_day09_testset.txt";
     String filename = "/home/christoph/Projects/IdeaProjects/AdventOfCode/2024/input/input_day09.txt";
 
     private final List<Integer> input = new ArrayList<>();
 
-    public Day09_XYZ() {
+    public Day09_DiskFragmenter() {
         readInput();
         // moveBlocks_Part1();
         moveBlocks_Part2();
@@ -134,7 +134,5 @@ public class Day09_XYZ {
         }
     }
 
-    public static void main(String[] args) {
-        new Day09_XYZ();
-    }
+    public static void main(String[] args) { new Day09_DiskFragmenter(); }
 }

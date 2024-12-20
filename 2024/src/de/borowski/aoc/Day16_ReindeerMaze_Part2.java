@@ -38,13 +38,14 @@ public class Day16_ReindeerMaze_Part2 {
         Values v = new Values(0, d);
         Values v_next;
         visitedNodes.put(c, v);
+        addNeighborNodes(c, v);
         do {
-            addNeighborNodes(c, v);
             c_next = pickNeighborWithMinimumDistanceValue();
             v_next = neighborNodes.remove(c_next);
             c = c_next;
             v = v_next;
             visitedNodes.put(c, v);
+            addNeighborNodes(c, v);
         } while (!unvisitedNodes.isEmpty());
     }
 
@@ -174,5 +175,4 @@ public class Day16_ReindeerMaze_Part2 {
     }
 
     public static void main(String[] args) { new Day16_ReindeerMaze_Part2(); }
-    // 87380 too high
 }
