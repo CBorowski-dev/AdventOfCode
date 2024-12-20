@@ -9,7 +9,9 @@ import java.util.Objects;
 
 public class Day20_RaceCondition {
     private final int size =141; // 15 141
-    // String filename = "/home/christoph/Projects/IdeaProjects/AdventOfCode/2024/input/input_day20_testset.txt";
+    private final int savings = 100;
+
+    //String filename = "/home/christoph/Projects/IdeaProjects/AdventOfCode/2024/input/input_day20_testset.txt";
     String filename = "/home/christoph/Projects/IdeaProjects/AdventOfCode/2024/input/input_day20.txt";
 
     private final Map<Coordinate, Integer> visitedNodes = new HashMap<>();
@@ -40,15 +42,15 @@ public class Day20_RaceCondition {
                     try {
                         searchShortestPath(new Coordinate(startY, startX));
                         currentShortestPath = visitedNodes.get(new Coordinate(endY, endX));
-                        if (shortestPath - currentShortestPath >= 100) count++;
+                        if (shortestPath - currentShortestPath >= savings) count++;
                     } catch (NullPointerException e) {
-                        //System.out.println(y + " - " + x);
+                        System.out.println(y + " - " + x);
                     }
                     maze[y][x] = '#';
                 }
             }
         }
-        System.out.println(count);
+        System.out.println("Savings: " + count);
     }
 
     private void searchShortestPath(Coordinate c) {
@@ -56,14 +58,16 @@ public class Day20_RaceCondition {
         int pathLength = 0;
         int pathLengthNext;
         visitedNodes.put(c, pathLength);
+        unvisitedNodes.remove(c);
+        addNeighborNodes(c, pathLength);
         do {
-            addNeighborNodes(c, pathLength);
             c_next = pickNeighborWithMinimumDistanceValue();
             pathLengthNext = neighborNodes.remove(c_next);
             c = c_next;
             pathLength = pathLengthNext;
             visitedNodes.put(c, pathLength);
-        } while (!unvisitedNodes.isEmpty());
+            addNeighborNodes(c, pathLength);
+        } while (!neighborNodes.isEmpty());
     }
 
     private Coordinate pickNeighborWithMinimumDistanceValue() {
@@ -112,7 +116,7 @@ public class Day20_RaceCondition {
         unvisitedNodes.clear();
         for (int y = 1; y<size-1; y++) {
             for (int x = 1; x<size-1; x++) {
-                if (maze[y][x] == '.' || maze[y][x] == 'E') {
+                if (maze[y][x] != '#') {
                     unvisitedNodes.put(new Coordinate(y, x), -1);
                 }
             }
@@ -172,5 +176,4 @@ public class Day20_RaceCondition {
     }
 
     public static void main(String[] args) { new Day20_RaceCondition(); }
-    // 1436 too low
 }
