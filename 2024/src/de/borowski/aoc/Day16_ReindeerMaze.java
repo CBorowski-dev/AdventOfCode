@@ -45,7 +45,7 @@ public class Day16_ReindeerMaze {
             v = v_next;
             visitedNodes.put(c, v);
             addNeighborNodes(c, v.d, v.pathLength);
-        } while (!unvisitedNodes.isEmpty());
+        } while (!neighborNodes.isEmpty());
     }
 
     private Coordinate pickNeighborWithMinimumDistanceValue() {
@@ -67,25 +67,33 @@ public class Day16_ReindeerMaze {
         // NORTH
         Coordinate k = new Coordinate(y - 1, x);
         if (maze[y-1][x] != '#' && !visitedNodes.containsKey(k)) {
-            neighborNodes.put(k, new Values(pathLength + (d.equals(Direction.NORTH) ? 1 : 1001), Direction.NORTH));
+            Values vTmp = neighborNodes.get(k);
+            Values v1 = new Values(pathLength + (d.equals(Direction.NORTH) ? 1 : 1001), Direction.NORTH);
+            if (vTmp == null || vTmp.pathLength > v1.pathLength) { neighborNodes.put(k, v1); }
             unvisitedNodes.remove(k);
         }
         // EAST
         k = new Coordinate(y, x + 1);
         if (maze[y][x+1] != '#' && !visitedNodes.containsKey(k)) {
-            neighborNodes.put(k, new Values(pathLength + (d.equals(Direction.EAST) ? 1 : 1001), Direction.EAST));
+            Values vTmp = neighborNodes.get(k);
+            Values v1 = new Values(pathLength + (d.equals(Direction.EAST) ? 1 : 1001), Direction.EAST);
+            if (vTmp == null || vTmp.pathLength > v1.pathLength) { neighborNodes.put(k, v1); }
             unvisitedNodes.remove(k);
         }
         // WEST
         k = new Coordinate(y, x - 1);
         if (maze[y][x-1] != '#' && !visitedNodes.containsKey(k)) {
-            neighborNodes.put(k, new Values(pathLength + (d.equals(Direction.WEST) ? 1 : 1001), Direction.WEST));
+            Values vTmp = neighborNodes.get(k);
+            Values v1 = new Values(pathLength + (d.equals(Direction.WEST) ? 1 : 1001), Direction.WEST);
+            if (vTmp == null || vTmp.pathLength > v1.pathLength) { neighborNodes.put(k, v1); }
             unvisitedNodes.remove(k);
         }
         // SOUTH
         k = new Coordinate(y + 1, x);
         if (maze[y+1][x] != '#' && !visitedNodes.containsKey(k)) {
-            neighborNodes.put(k, new Values(pathLength + (d.equals(Direction.SOUTH) ? 1 : 1001), Direction.SOUTH));
+            Values vTmp = neighborNodes.get(k);
+            Values v1 = new Values(pathLength + (d.equals(Direction.SOUTH) ? 1 : 1001), Direction.SOUTH);
+            if (vTmp == null || vTmp.pathLength > v1.pathLength) { neighborNodes.put(k, v1); }
             unvisitedNodes.remove(k);
         }
     }
