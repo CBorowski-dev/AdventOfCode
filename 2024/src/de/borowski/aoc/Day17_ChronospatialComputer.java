@@ -6,8 +6,8 @@ import java.io.IOException;
 
 public class Day17_ChronospatialComputer {
 
-    String filename = "/home/christoph/Projects/IdeaProjects/AdventOfCode/2024/input/input_day17_testset.txt";
-    // String filename = "/home/christoph/Projects/IdeaProjects/AdventOfCode/2024/input/input_day17.txt";
+    //String filename = "/home/christoph/Projects/IdeaProjects/AdventOfCode/2024/input/input_day17_testset.txt";
+    String filename = "/home/christoph/Projects/IdeaProjects/AdventOfCode/2024/input/input_day17.txt";
 
     long regA = 0;
     long regB = 0;

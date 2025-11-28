@@ -14,17 +14,30 @@ public class Day17_ChronospatialComputer_Part2 {
     long regC = 0;
     int[] program;
 
+    // 2105355
+    // 32101347331053713310136320105315201013072110533121101323
+    // 1611535516111347171153711711136304115315041113070511533105111323720253557202134773025371730213636002531560021307610253316102132356035355560313475703537157031363440353154403130745035331450313233234535532341347333453713334136320345315203413072134533121341323163553551635134717355371173513630435531504351307053553310535132372265355722613477326537173261363602653156026130761265331612613235627535556271347572753715727136344275315442713074527533145271323
+    // 32505355325
+
+    StringBuffer output = new StringBuffer();
+
     public Day17_ChronospatialComputer_Part2() {
         readInput();
         System.out.println("--------------------------------");
         // for (long a=117440-10; a<117440+10; a++) {
-        for (long a=0l; a<200l; a++) {
+        for (long a=900000000l; a<9000000000l; a++) {
             // if (a % 100000000 == 0) System.out.println("--> " + a);
-            System.out.print(a + " : ");
+            //System.out.print(a + " : ");
             regA = a;
             //if (runProgramm()) System.out.println(a);
             runProgramm();
-            System.out.println();
+            if (output.length() >= 10 && output.substring(0, 10).equals("24157516034")) {
+                System.out.println(a + ": " + output);
+            }
+            /*if (a>=0 && a<8) {
+                System.out.print(output);
+            }*/
+            output = new StringBuffer();
         }
     }
 
@@ -54,7 +67,8 @@ public class Day17_ChronospatialComputer_Part2 {
                     long outValue = getComboOperandValue(operand) % 8;
                     //if (program[idx] != outValue) return false;
                     //idx++;
-                    System.out.print(outValue + ",");
+                    //System.out.print(outValue + ",");
+                    output.append(outValue);
                     break;
                 case 6: // bdv
                     long denominator = (long) Math.pow(2, getComboOperandValue(operand));
