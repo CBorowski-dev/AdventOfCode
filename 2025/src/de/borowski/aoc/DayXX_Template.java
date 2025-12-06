@@ -15,8 +15,8 @@ public class DayXX_Template {
 		BufferedReader reader;
 		
 		try {
-			// reader = new BufferedReader(new FileReader("/home/christoph/Projects/IdeaProjects/AdventOfCode/2025/input/input_day01_testset.txt"));
-			reader = new BufferedReader(new FileReader("/home/christoph/Projects/IdeaProjects/AdventOfCode/2025/input/input_day01.txt"));
+			reader = new BufferedReader(new FileReader("/home/christoph/Projects/IdeaProjects/AdventOfCode/2025/input/input_day01_testset.txt"));
+			// reader = new BufferedReader(new FileReader("/home/christoph/Projects/IdeaProjects/AdventOfCode/2025/input/input_day01.txt"));
 			String line = reader.readLine();
 			
 			while (line != null) {
