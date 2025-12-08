@@ -14,9 +14,10 @@ public class Day08_Playground {
     public static void main(String[] args) {
         BufferedReader reader;
 
+        final int MAX_CONNECTIONS = 1000; // Part 1: 10 for test data or 1000 and for Part 2: 100000
         try {
-            reader = new BufferedReader(new FileReader("/home/christoph/Projects/IdeaProjects/AdventOfCode/2025/input/input_day08_testset.txt"));
-            // reader = new BufferedReader(new FileReader("/home/christoph/Projects/IdeaProjects/AdventOfCode/2025/input/input_day08.txt"));
+            // reader = new BufferedReader(new FileReader("/home/christoph/Projects/IdeaProjects/AdventOfCode/2025/input/input_day08_testset.txt"));
+            reader = new BufferedReader(new FileReader("/home/christoph/Projects/IdeaProjects/AdventOfCode/2025/input/input_day08.txt"));
             String line = reader.readLine();
 
             while (line != null) {
@@ -48,31 +49,42 @@ public class Day08_Playground {
         // create circuit
         int connectionCount = 0;
         int maxCircuitNumber = -1;
-        for (int i = 0; i < sortedDistances.size() && connectionCount < 10; i++) {
+        for (int i = 0; i < sortedDistances.size() && connectionCount < MAX_CONNECTIONS; i++) {
             double d = sortedDistances.get(i);
             Distance dist = distances.get(d);
             int b1Index = boxes.indexOf(dist.b1);
             int b2Index = boxes.indexOf(dist.b2);
-            Integer b1InCircuitNumber = inCircuit.get(b1Index);
-            Integer b2InCircuitNumber = inCircuit.get(b2Index);
+            int b1InCircuitNumber = inCircuit.get(b1Index);
+            int b2InCircuitNumber = inCircuit.get(b2Index);
             if (b1InCircuitNumber == -1 && b2InCircuitNumber == -1) {
                 maxCircuitNumber++;
                 inCircuit.remove(b1Index);
                 inCircuit.add(b1Index, maxCircuitNumber);
                 inCircuit.remove(b2Index);
                 inCircuit.add(b2Index, maxCircuitNumber);
+                if (checkOneCircuit())
+                    System.out.println("Part 2: " + dist.b1.x + " - " + dist.b2.x + " ==> " + dist.b1.x * dist.b2.x);
                 connectionCount++;
             } else if (b1InCircuitNumber == -1 && b2InCircuitNumber >= 0) {
                 inCircuit.remove(b1Index);
                 inCircuit.add(b1Index, b2InCircuitNumber);
+                if (checkOneCircuit())
+                    System.out.println("Part 2: " + dist.b1.x + " - " + dist.b2.x + " ==> " + dist.b1.x * dist.b2.x);
                 connectionCount++;
             } else if (b1InCircuitNumber >= 0 && b2InCircuitNumber == -1) {
                 inCircuit.remove(b2Index);
                 inCircuit.add(b2Index, b1InCircuitNumber);
+                if (checkOneCircuit())
+                    System.out.println("Part 2: " + dist.b1.x + " - " + dist.b2.x + " ==> " + dist.b1.x * dist.b2.x);
+                connectionCount++;
+            } else if (b1InCircuitNumber >= 0 && b2InCircuitNumber >= 0 && b1InCircuitNumber != b2InCircuitNumber) {
+                // connect two circuits
+                connectCircuits(b1InCircuitNumber, b2InCircuitNumber);
+                if (checkOneCircuit())
+                    System.out.println("Part 2: " + dist.b1.x + " - " + dist.b2.x + " ==> " + dist.b1.x * dist.b2.x);
                 connectionCount++;
             } else {
-                // connectionCount++;
-                System.out.println("x");
+                connectionCount++;
             }
         }
         // the three largest circuits
@@ -87,7 +99,25 @@ public class Day08_Playground {
         }
 
         System.out.println("--------------------------------");
-        System.out.println(result);
+        System.out.println("Part 1: " + result);
+    }
+
+    private static boolean checkOneCircuit() {
+        int v = inCircuit.get(0);
+        for (int i = 1; i < inCircuit.size(); i++) {
+            if (inCircuit.get(i) != v) return false;
+        }
+        return true;
+    }
+
+    private static void connectCircuits(int b1InCircuitNumber, int b2InCircuitNumber) {
+        for (int i = 0; i < inCircuit.size(); i++) {
+            int circuitNumber = inCircuit.get(i);
+            if (circuitNumber == b2InCircuitNumber) {
+                inCircuit.remove(i);
+                inCircuit.add(i, b1InCircuitNumber);
+            }
+        }
     }
 
     public record Box(int x, int y, int z) {
