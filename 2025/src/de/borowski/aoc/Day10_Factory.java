@@ -10,6 +10,7 @@ public class Day10_Factory {
 
 	public static final List<Integer> LIGHTS_GOAL = new ArrayList<>();
 	public static final List<List<Integer>> SWITCHES = new ArrayList<>();
+	public static final List<List<Integer>> JOLTAGES_GOAL = new ArrayList<>();
 
 	public static void main(String[] args) {
 		BufferedReader reader;
@@ -38,6 +39,17 @@ public class Day10_Factory {
 					encodedSwitches.add(encodedSwitch);
 				}
 				SWITCHES.add(encodedSwitches);
+
+				// joltages
+				String joltagesStr = parts[1].substring(0, parts[1].length()-1);
+				String[] j = joltagesStr.split(",");
+				List<Integer> joltages = new ArrayList<>();
+				for (String s: j) {
+					int e = Integer.parseInt(s);
+					if (e==0) System.out.println(joltagesStr);
+					joltages.add(e);
+				}
+				JOLTAGES_GOAL.add(joltages);
 				// read next line
 				line = reader.readLine();
 			}
@@ -46,14 +58,36 @@ public class Day10_Factory {
 			e.printStackTrace();
 		}
 
+		long result = 0;
+
 		// Part 1
-		int result = 0;
-		for (int i=0; i<LIGHTS_GOAL.size(); i++) {
+		/*for (int i=0; i<LIGHTS_GOAL.size(); i++) {
 			Integer lightGoal = LIGHTS_GOAL.get(i);
 			result += findFewestTotalPresses(lightGoal, SWITCHES.get(i));
+		}*/
+
+		// Part 2
+		for (int i=0; i<JOLTAGES_GOAL.size(); i++) {
+			List<Integer> joltageGoal = JOLTAGES_GOAL.get(i);
+			result += findFewestTotalPresses(joltageGoal, SWITCHES.get(i));
 		}
 		System.out.println("--------------------------------");
 		System.out.println(result);
+	}
+
+	private static int findFewestTotalPresses(List<Integer> joltageGoal, List<Integer> encodedSwitches) {
+		int num = findLowestNumber(joltageGoal);
+		//findPatternForLowestNumber(joltageGoal, num);
+
+		return 0;
+	}
+
+	private static int findLowestNumber(List<Integer> joltageGoal) {
+		int lowestNumber = Integer.MAX_VALUE;
+		for (int i: joltageGoal) {
+			if (i<lowestNumber) lowestNumber = i;
+		}
+		return lowestNumber;
 	}
 
 	private static int findFewestTotalPresses(Integer lightGoal, List<Integer> encodedSwitches) {
