@@ -60,4 +60,15 @@ public class Day11_Reactor {
 		}
 	}
 
+	public class Node {
+		String label;
+		int counter = 0;
+		List<String> childNodes;
+
+		public Node(String label, List<String> childNodes) {
+			this.label = label;
+			this.childNodes = childNodes;
+		}
+	}
+
 }
