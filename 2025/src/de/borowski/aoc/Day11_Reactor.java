@@ -13,12 +13,12 @@ public class Day11_Reactor {
 
 	public static void main(String[] args) {
 		BufferedReader reader;
-		
+
 		try {
 			// reader = new BufferedReader(new FileReader("/home/christoph/Projects/IdeaProjects/AdventOfCode/2025/input/input_day11_testset.txt"));
 			reader = new BufferedReader(new FileReader("/home/christoph/Projects/IdeaProjects/AdventOfCode/2025/input/input_day11.txt"));
 			String line = reader.readLine();
-			
+
 			while (line != null) {
 				// System.out.println(line);
 				String[] nodes = line.split(": ");
@@ -50,8 +50,13 @@ public class Day11_Reactor {
 
 	private static void searchAllSpecialPaths(List<String> nodes) {
 		for (String n: nodes) {
-			if (n.equals("fft")) counter++;
-			else searchAllPaths(CON.get(n));
+			if (n.equals("fft")) {
+				counter++;
+				System.out.print('*');
+			} else {
+				List<String> nodes2 = CON.get(n);
+				if (nodes2 != null) searchAllSpecialPaths(nodes2);
+			}
 		}
 	}
 
