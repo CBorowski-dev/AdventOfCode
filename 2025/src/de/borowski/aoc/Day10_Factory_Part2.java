@@ -16,8 +16,8 @@ public class Day10_Factory_Part2 {
 		BufferedReader reader;
 		
 		try {
-			// reader = new BufferedReader(new FileReader("/home/christoph/Projects/IdeaProjects/AdventOfCode/2025/input/input_day10_testset.txt"));
-			reader = new BufferedReader(new FileReader("/home/christoph/Projects/IdeaProjects/AdventOfCode/2025/input/input_day10.txt"));
+			reader = new BufferedReader(new FileReader("/home/christoph/Projects/IdeaProjects/AdventOfCode/2025/input/input_day10_testset.txt"));
+			// reader = new BufferedReader(new FileReader("/home/christoph/Projects/IdeaProjects/AdventOfCode/2025/input/input_day10.txt"));
 			String line = reader.readLine();
 			
 			while (line != null) {
@@ -63,17 +63,43 @@ public class Day10_Factory_Part2 {
 		// Part 2
 		for (int i=0; i<JOLTAGES_GOAL.size(); i++) {
 			List<Integer> joltageGoal = JOLTAGES_GOAL.get(i);
-			result += findFewestTotalPresses(joltageGoal, SWITCHES.get(i));
+			Integer[] goals = new Integer[joltageGoal.size()];
+			System.out.print('*');
+			result += findFewestTotalPresses(joltageGoal.toArray(goals), SWITCHES.get(i), new ArrayList<Integer>(), 1, Integer.MAX_VALUE);
 		}
 		System.out.println("--------------------------------");
 		System.out.println(result);
 	}
 
-	private static int findFewestTotalPresses(List<Integer> joltageGoal, List<List<Integer>> encodedSwitches) {
+	private static int findFewestTotalPresses(Integer[] joltageGoal, List<List<Integer>> encodedSwitches, List<Integer> xxx, int recursion, int bestResult) {
 		//Generate bit mask
-		int bitCount = getNecessaryBitCount(joltageGoal, encodedSwitches);
-		if (bitCount > 64) System.out.println(bitCount);
-		return 0;
+		// int bitCount = getNecessaryBitCount(joltageGoal, encodedSwitches);
+		// if (bitCount > 64) System.out.println(bitCount);
+		for (int j=0; j<encodedSwitches.size(); j++) {
+			xxx.add(j);
+			List<Integer> indexes = encodedSwitches.get(j);
+			for (Integer i : indexes) {
+				joltageGoal[i]--;
+			}
+			boolean allowed = true;
+			boolean allZero = true;
+			for (int m = 0; m<joltageGoal.length; m++) {
+				if (joltageGoal[m] < 0) allowed = false;
+				if (joltageGoal[m] != 0) allZero = false;
+			}
+			if (allZero) {
+				bestResult = recursion;
+				System.out.print("Solution " + recursion + " : ");
+				for (Integer e : xxx) System.out.print(e);
+				System.out.println();
+			}
+			else if (allowed && recursion + 1 < bestResult) bestResult = findFewestTotalPresses(joltageGoal, encodedSwitches, xxx, recursion + 1, bestResult);
+			for (Integer i : indexes) {
+				joltageGoal[i]++;
+			}
+			xxx.remove(xxx.size()-1);
+		}
+		return bestResult;
 	}
 
 	private static int getNecessaryBitCount(List<Integer> joltageGoal, List<List<Integer>> encodedSwitches) {
