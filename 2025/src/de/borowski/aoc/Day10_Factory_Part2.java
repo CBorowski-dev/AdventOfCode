@@ -36,7 +36,7 @@ public class Day10_Factory_Part2 {
                     encodedSwitches.add(indexes);
                 }
                 // sort
-                encodedSwitches.sort((o1, o2) -> o2.size() - o1.size());
+                // encodedSwitches.sort((o1, o2) -> o2.size() - o1.size());
                 SWITCHES.add(encodedSwitches);
 
                 // joltages
@@ -68,19 +68,22 @@ public class Day10_Factory_Part2 {
             int maxButtonPressCount = 0;
             for (int bp : joltageGoal) maxButtonPressCount += bp;
             System.out.print("* ");
-            result += findFewestTotalPresses(joltageGoal.toArray(goals), SWITCHES.get(i),1, maxButtonPressCount);
+            result += findFewestTotalPresses(joltageGoal.toArray(goals), SWITCHES.get(i), 1, maxButtonPressCount);
         }
         System.out.println("--------------------------------");
         System.out.println(result);
     }
     // 58280 to high
 
-    private static int findFewestTotalPresses(Integer[] joltageGoal, List<List<Integer>> encodedSwitches, int recursion, int bestResult) {
-        int bestResultOriginal = bestResult;
-        // List<List<Integer>> usableSwitches = findUsableSwitches(encodedSwitches, joltageGoal);
-        for (int j = 0; j < encodedSwitches.size(); j++) {
-            List<Integer> indexes = encodedSwitches.get(j);
-            for (Integer i : indexes) joltageGoal[i]--;
+    private static int findFewestTotalPresses(Integer[] joltageGoal, List<List<Integer>> encodedSwitchIndexes, int recursion, int maxButtonPressCount) {
+        List<List<Integer>> usableSwitchIndexes = findUsableSwitchIndexes(encodedSwitchIndexes, joltageGoal);
+        if (usableSwitchIndexes.size()==0) return -128;
+        for (int j = 0; j < usableSwitchIndexes.size(); j++) {
+            // get next switch
+            List<Integer> indexes = usableSwitchIndexes.get(j);
+            // substract from joltageGoal at the indexes
+            for (Integer idx : indexes) joltageGoal[idx]--;
+            // check current joltageGoal
             boolean allowed = true;
             boolean allZero = true;
             for (Integer integer : joltageGoal) {
@@ -89,18 +92,18 @@ public class Day10_Factory_Part2 {
             }
             if (allZero) {
                 printSolution(recursion);
-                for (Integer i : indexes) joltageGoal[i]++;
+                for (Integer idx : indexes) joltageGoal[idx]++;
                 return recursion;
-            } else if (allowed && ((recursion + 1) < bestResult) && !containsGoal(joltageGoal)) {
-                bestResult= findFewestTotalPresses(joltageGoal, encodedSwitches,recursion + 1, bestResult);
-                // if (tmpResult < bestResult) return bestResult = ;
+            } else if (allowed && (recursion + 1 < maxButtonPressCount) && !containsGoal(joltageGoal)) {
+                int bpc = findFewestTotalPresses(joltageGoal, encodedSwitchIndexes, recursion + 1, maxButtonPressCount);
+                if (bpc == -128 && !containsGoal(joltageGoal)) {
+                    UNUSABLE_SOLUTIONS.add(Arrays.copyOf(joltageGoal, joltageGoal.length));
+                }
+                if (bpc != -128 && bpc < maxButtonPressCount) maxButtonPressCount = bpc;
             }
-            for (Integer i : indexes) joltageGoal[i]++;
+            for (Integer idx : indexes) joltageGoal[idx]++;
         }
-        if (bestResultOriginal == bestResult && !containsGoal(joltageGoal)) {
-            UNUSABLE_SOLUTIONS.add(Arrays.copyOf(joltageGoal, joltageGoal.length));
-        }
-        return bestResult;
+        return maxButtonPressCount;
     }
 
     private static boolean containsGoal(Integer[] joltageGoal) {
@@ -110,16 +113,26 @@ public class Day10_Factory_Part2 {
         return false;
     }
 
-    private static List<List<Integer>> findUsableSwitches(List<List<Integer>> encodedSwitches, Integer[] joltageGoal) {
-        List<List<Integer>> usableSwitches = new ArrayList<>();
+    private static List<List<Integer>> findUsableSwitchIndexes(List<List<Integer>> encodedSwitches, Integer[] joltageGoal) {
+        List<List<Integer>> usableSwitchIndexes = new ArrayList<>();
         a:
         for (List<Integer> indexes : encodedSwitches) {
             for (Integer index : indexes) {
                 if (joltageGoal[index] == 0) continue a;
             }
-            usableSwitches.add(indexes);
+            usableSwitchIndexes.add(indexes);
         }
-        return usableSwitches;
+        if (usableSwitchIndexes.size()==1) {
+            int old = -1;
+            b: for (int g : joltageGoal) {
+                if (old == -1 && g != 0) old = g;
+                if (old != -1 && g != 0 && old != g) {
+                    usableSwitchIndexes.remove(0);
+                    break b;
+                }
+            }
+        }
+        return usableSwitchIndexes;
     }
 
     private static void printSolution(int recursion) {
