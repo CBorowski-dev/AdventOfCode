@@ -16,8 +16,8 @@ public class Day10_Factory {
 		BufferedReader reader;
 		
 		try {
-			reader = new BufferedReader(new FileReader("/home/christoph/Projects/IdeaProjects/AdventOfCode/2025/input/input_day10_testset.txt"));
-			// reader = new BufferedReader(new FileReader("/home/christoph/Projects/IdeaProjects/AdventOfCode/2025/input/input_day10.txt"));
+			// reader = new BufferedReader(new FileReader("/home/christoph/Projects/IdeaProjects/AdventOfCode/2025/input/input_day10_testset.txt"));
+			reader = new BufferedReader(new FileReader("/home/christoph/Projects/IdeaProjects/AdventOfCode/2025/input/input_day10.txt"));
 			String line = reader.readLine();
 			
 			while (line != null) {
@@ -61,23 +61,12 @@ public class Day10_Factory {
 		long result = 0;
 
 		// Part 1
-		/*
 		for (int i=0; i<LIGHTS_GOAL.size(); i++) {
 			Integer lightGoal = LIGHTS_GOAL.get(i);
 			result += findFewestTotalPresses(lightGoal, SWITCHES.get(i));
-		}*/
-
-		// Part 2
-		for (int i=0; i<JOLTAGES_GOAL.size(); i++) {
-			List<Integer> joltageGoal = JOLTAGES_GOAL.get(i);
-			result += findFewestTotalPresses(joltageGoal, SWITCHES.get(i));
 		}
 		System.out.println("--------------------------------");
 		System.out.println(result);
-	}
-
-	private static int findFewestTotalPresses(List<Integer> joltageGoal, List<Integer> encodedSwitches) {
-		return 0;
 	}
 
 	private static int findFewestTotalPresses(Integer lightGoal, List<Integer> encodedSwitches) {

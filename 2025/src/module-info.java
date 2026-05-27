@@ -2,5 +2,7 @@
  * @author cborowski
  *
  */
-module AdventOfCode_2024 {
+@SuppressWarnings("module")
+module AdventOfCode_2025 {
+    requires org.apache.commons.math4.legacy;
 }

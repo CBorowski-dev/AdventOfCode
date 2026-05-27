@@ -3,52 +3,54 @@ package de.borowski.aoc;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Day10_Factory_Part2 {
 
-    public static final List<List<List<Integer>>> SWITCHES = new ArrayList<>();
+    public static final List<Integer> LIGHTS_GOAL = new ArrayList<>();
+    public static final List<List<Integer>> SWITCHES = new ArrayList<>();
     public static final List<List<Integer>> JOLTAGES_GOAL = new ArrayList<>();
-    public static final Set<Integer[]> UNUSABLE_SOLUTIONS = new HashSet<>();
 
     public static void main(String[] args) {
         BufferedReader reader;
 
         try {
-            // reader = new BufferedReader(new FileReader("/home/christoph/Projects/IdeaProjects/AdventOfCode/2025/input/input_day10_testset.txt"));
-            reader = new BufferedReader(new FileReader("/home/christoph/Projects/IdeaProjects/AdventOfCode/2025/input/input_day10.txt"));
+            reader = new BufferedReader(new FileReader("/home/christoph/Projects/IdeaProjects/AdventOfCode/2025/input/input_day10_testset.txt"));
+            // reader = new BufferedReader(new FileReader("/home/christoph/Projects/IdeaProjects/AdventOfCode/2025/input/input_day10.txt"));
+            // reader = new BufferedReader(new FileReader("/home/christoph/Projects/IdeaProjects/AdventOfCode/2025/input/input_day10_test.txt"));
+
             String line = reader.readLine();
 
             while (line != null) {
                 // lights
                 String[] parts = line.split("] ");
+                LIGHTS_GOAL.add(createBitMask(parts[0].substring(1)));
+
                 // switches
                 parts = parts[1].split(" \\{");
                 String[] switches = parts[0].split(" ");
-                List<List<Integer>> encodedSwitches = new ArrayList<>();
-                for (String s : switches) {
-                    List<Integer> indexes = new ArrayList<>();
-                    s = s.substring(1, s.length() - 1);
+                List<Integer> encodedSwitches = new ArrayList<>();
+                for (String s: switches) {
+                    int encodedSwitch = 0;
+                    s = s.substring(1, s.length()-1);
                     String[] values = s.split(",");
-                    for (String s2 : values) {
-                        indexes.add(Integer.parseInt(s2));
+                    for (String s2: values) {
+                        encodedSwitch = encodedSwitch ^ (int) Math.pow(2, Integer.parseInt(s2));
                     }
-                    encodedSwitches.add(indexes);
+                    encodedSwitches.add(encodedSwitch);
                 }
-                // sort
-                // encodedSwitches.sort((o1, o2) -> o2.size() - o1.size());
                 SWITCHES.add(encodedSwitches);
 
                 // joltages
-                String joltagesStr = parts[1].substring(0, parts[1].length() - 1);
+                String joltagesStr = parts[1].substring(0, parts[1].length()-1);
                 String[] j = joltagesStr.split(",");
                 List<Integer> joltages = new ArrayList<>();
-                for (String s : j) {
+                for (String s: j) {
                     int e = Integer.parseInt(s);
-                    if (e == 0) System.out.println(joltagesStr);
+                    if (e==0) System.out.println(joltagesStr);
                     joltages.add(e);
                 }
-                // sort by size
                 JOLTAGES_GOAL.add(joltages);
                 // read next line
                 line = reader.readLine();
@@ -60,84 +62,113 @@ public class Day10_Factory_Part2 {
 
         long result = 0;
 
-        // Part 2
-        for (int i = 0; i < JOLTAGES_GOAL.size(); i++) {
-            List<Integer> joltageGoal = JOLTAGES_GOAL.get(i);
-            Integer[] goals = new Integer[joltageGoal.size()];
-            UNUSABLE_SOLUTIONS.clear();
-            int maxButtonPressCount = 0;
-            for (int bp : joltageGoal) maxButtonPressCount += bp;
-            System.out.print("* ");
-            result += findFewestTotalPresses(joltageGoal.toArray(goals), SWITCHES.get(i), 1, maxButtonPressCount);
+        // Part 1
+        /* for (int i=0; i<LIGHTS_GOAL.size(); i++) {
+            Integer lightGoal = LIGHTS_GOAL.get(i);
+            result += findFewestTotalPresses(lightGoal, SWITCHES.get(i));
         }
         System.out.println("--------------------------------");
         System.out.println(result);
-    }
-    // 58280 to high
+         */
 
-    private static int findFewestTotalPresses(Integer[] joltageGoal, List<List<Integer>> encodedSwitchIndexes, int recursion, int maxButtonPressCount) {
-        List<List<Integer>> usableSwitchIndexes = findUsableSwitchIndexes(encodedSwitchIndexes, joltageGoal);
-        if (usableSwitchIndexes.size()==0) return -128;
-        for (int j = 0; j < usableSwitchIndexes.size(); j++) {
-            // get next switch
-            List<Integer> indexes = usableSwitchIndexes.get(j);
-            // substract from joltageGoal at the indexes
-            for (Integer idx : indexes) joltageGoal[idx]--;
-            // check current joltageGoal
-            boolean allowed = true;
-            boolean allZero = true;
-            for (Integer integer : joltageGoal) {
-                if (integer < 0) allowed = false;
-                if (integer != 0) allZero = false;
+        // Part 2
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < JOLTAGES_GOAL.size(); i++) {
+            result += part2(JOLTAGES_GOAL.get(i), SWITCHES.get(i));
+        }
+        long end = System.currentTimeMillis();
+        System.out.println("--------------------------------");
+        System.out.println((end - start)/ 1000.0);
+        System.out.println("--------------------------------");
+        System.out.println(result);
+    }
+
+    private static long part2(List<Integer> joltageGoal, List<Integer> switches) {
+        // finished ermitteln
+        boolean finished = true;
+        for (Integer j : joltageGoal) if (j > 0) finished = false;
+        if (finished) return 0;
+
+        long result = Long.MAX_VALUE;
+
+        // Überprüfen, ob noch weiter gesucht werden muss
+        // Integer[] goals = new Integer[joltageGoal.size()];
+        StringBuffer sb = new StringBuffer();
+        boolean foundLight = false;
+        for (Integer j : joltageGoal) {
+            if ((j & 1) == 1) {
+                sb.append('#');
+                foundLight = true;
+            } else {
+                sb.append('.');
             }
-            if (allZero) {
-                printSolution(recursion);
-                for (Integer idx : indexes) joltageGoal[idx]++;
-                return recursion;
-            } else if (allowed && (recursion + 1 < maxButtonPressCount) && !containsGoal(joltageGoal)) {
-                int bpc = findFewestTotalPresses(joltageGoal, encodedSwitchIndexes, recursion + 1, maxButtonPressCount);
-                if (bpc == -128 && !containsGoal(joltageGoal)) {
-                    UNUSABLE_SOLUTIONS.add(Arrays.copyOf(joltageGoal, joltageGoal.length));
+        }
+
+        // Es gibt noch Lichter, die abzubauen sind
+        if (foundLight) {
+            Integer lightGoal = createBitMask(sb.toString());
+            List<Combo> combos = findAllPossiblePresses(lightGoal, switches); // * faktor
+
+            for (Combo c: combos) {
+                // joltageGoalNextRecursion gemäß combos erstellen
+                List<Integer> joltageGoalNextRecursion = new ArrayList<>();
+                for (int i = 0; i< joltageGoal.size(); i++) {
+                    joltageGoalNextRecursion.add(joltageGoal.get(i));
                 }
-                if (bpc != -128 && bpc < maxButtonPressCount) maxButtonPressCount = bpc;
+                // joltageGoalNextRecursion gemäß Combo c erniedrigen
+
+                // Rekursiver Aufruf
+                long tmpResult = part2(joltageGoalNextRecursion, switches);
+                if ((tmpResult + c.buttonPressCount) < result) result = tmpResult + c.buttonPressCount;
             }
-            for (Integer idx : indexes) joltageGoal[idx]++;
         }
-        return maxButtonPressCount;
+        return result;
     }
 
-    private static boolean containsGoal(Integer[] joltageGoal) {
-        for (Integer[] x : UNUSABLE_SOLUTIONS) {
-            if (Arrays.equals(x, joltageGoal)) return true;
-        }
-        return false;
-    }
-
-    private static List<List<Integer>> findUsableSwitchIndexes(List<List<Integer>> encodedSwitches, Integer[] joltageGoal) {
-        List<List<Integer>> usableSwitchIndexes = new ArrayList<>();
-        a:
-        for (List<Integer> indexes : encodedSwitches) {
-            for (Integer index : indexes) {
-                if (joltageGoal[index] == 0) continue a;
-            }
-            usableSwitchIndexes.add(indexes);
-        }
-        if (usableSwitchIndexes.size()==1) {
-            int old = -1;
-            b: for (int g : joltageGoal) {
-                if (old == -1 && g != 0) old = g;
-                if (old != -1 && g != 0 && old != g) {
-                    usableSwitchIndexes.remove(0);
-                    break b;
+    private static int findFewestTotalPresses(Integer lightGoal, List<Integer> encodedSwitches) {
+        int minFewestTotalPresses = Integer.MAX_VALUE;
+        for (int comb = 1; comb < Math.pow(2, encodedSwitches.size()); comb++) {
+            int buttonPressCount = 0;
+            int mask = 0;
+            for (int i=0; i<encodedSwitches.size(); i++) {
+                if ((comb & (1 << i)) > 0) {
+                    mask = mask ^ encodedSwitches.get(i);
+                    buttonPressCount++;
                 }
             }
+            if (lightGoal == mask && minFewestTotalPresses > buttonPressCount) minFewestTotalPresses = buttonPressCount;
         }
-        return usableSwitchIndexes;
+        return minFewestTotalPresses;
     }
 
-    private static void printSolution(int recursion) {
-        System.out.println("Solution : " + recursion + " " + UNUSABLE_SOLUTIONS.size());
-        // for (Integer e : status) System.out.print(e);
-        // System.out.println();
+    private static List<Combo> findAllPossiblePresses(Integer lightGoal, List<Integer> encodedSwitches) {
+        List<Combo> allPossiblePresses = new ArrayList<>();
+        for (int comb = 1; comb < Math.pow(2, encodedSwitches.size()); comb++) {
+            int buttonPressCount = 0;
+            int mask = 0;
+            for (int i=0; i<encodedSwitches.size(); i++) {
+                if ((comb & (1 << i)) > 0) {
+                    mask = mask ^ encodedSwitches.get(i);
+                    buttonPressCount++;
+                }
+            }
+            if (lightGoal == mask) {
+                allPossiblePresses.add(new Combo(comb, buttonPressCount));
+            }
+        }
+        return allPossiblePresses;
     }
+
+    private static Integer createBitMask(String lights) {
+        int bitMask = 0;
+        char[] l = lights.toCharArray();
+        for (int i=0; i<l.length; i++) {
+            if (l[i] == '#') {
+                bitMask =  bitMask ^ (int) Math.pow(2, i);
+            }
+        }
+        return bitMask;
+    }
+
+    private record Combo(int combo, int buttonPressCount) {};
 }
