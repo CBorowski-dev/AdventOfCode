@@ -4,22 +4,21 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Day10_Factory_Part2 {
 
     public static final List<Integer> LIGHTS_GOAL = new ArrayList<>();
     public static final List<List<Integer>> SWITCHES = new ArrayList<>();
     public static final List<List<Integer>> JOLTAGES_GOAL = new ArrayList<>();
-    // public static final Map<Integer, Integer> SOLUTIONS = new HashMap<>();
+    public static final Map<String, Integer> SOLUTIONS_CACHE = new HashMap<>();
 
     public static void main(String[] args) {
         BufferedReader reader;
 
         try {
-            reader = new BufferedReader(new FileReader("/home/christoph/Projects/IdeaProjects/AdventOfCode/2025/input/input_day10_testset.txt"));
+            // reader = new BufferedReader(new FileReader("/home/christoph/Projects/IdeaProjects/AdventOfCode/2025/input/input_day10_testset.txt"));
             // reader = new BufferedReader(new FileReader("/home/christoph/Projects/IdeaProjects/AdventOfCode/2025/input/input_day10.txt"));
-            // reader = new BufferedReader(new FileReader("/home/christoph/Projects/IdeaProjects/AdventOfCode/2025/input/input_day10_test.txt"));
+            reader = new BufferedReader(new FileReader("/home/christoph/Projects/IdeaProjects/AdventOfCode/2025/input/input_day10_test.txt"));
 
             String line = reader.readLine();
 
@@ -66,9 +65,9 @@ public class Day10_Factory_Part2 {
         // Part 2
         long start = System.currentTimeMillis();
         for (int i = 0; i < JOLTAGES_GOAL.size(); i++) {
-            // SOLUTIONS.clear();
+            SOLUTIONS_CACHE.clear();
             long resultTmp = part2(JOLTAGES_GOAL.get(i), SWITCHES.get(i), 1);
-            System.out.println("--> " + resultTmp);
+            System.out.println((i+1) + " --> " + resultTmp);
             result += resultTmp;
         }
         long end = System.currentTimeMillis();
@@ -103,13 +102,10 @@ public class Day10_Factory_Part2 {
             for (Integer g : joltageGoal) sb.append((g > 0) ? '#' : '.');
         }
 
-
-
         Integer lightGoal = createBitMask(sb.toString());
         combos = findAllPossiblePresses(lightGoal, switches);
         System.out.println("-------------------------------------\nRekursion " + recursion + "\nPattern " + sb.toString() + " = " + printJoltageGoal(joltageGoal));
         System.out.println("# Combos " + combos.size() + " : " + printCombos(combos));
-        // System.out.print(recursion +  " " + sb.toString() + " " + lightGoal + " " + printJoltageGoal(joltageGoal) + printCombos(combos));
 
         if (combos.isEmpty()) {
             if (foundOdd) {
@@ -117,14 +113,14 @@ public class Day10_Factory_Part2 {
                 return Integer.MAX_VALUE;
             } else {
                 // keine Lösung gefunden und alle Counter waren vorher gerade: alle gerade --> halbieren
-                // System.out.println(" -> halbieren");
+                System.out.println(" -> halbieren");
                 joltageGoal.replaceAll(g -> g / 2);
                 faktor *= 2;
             }
         }
 
         if (faktor == 1) {
-            // System.out.println(" -> verarbeiten");
+            // Es gibt Combos
             nextc:
             for (Combo c : combos) {
                 System.out.println("Rekursion " + recursion + " Processing combo (" + c.combo + "|" + c.buttonPressCount + ")");
@@ -159,22 +155,44 @@ public class Day10_Factory_Part2 {
                         result = c.buttonPressCount;
                 } else {
                     System.out.println("--> Aufruf 1");
-                    // Rekursiver Aufruf
-                    int tmpResult = part2(joltageGoalNextRecursion, switches, recursion+1);
+                    int tmpResult = getResult(switches, recursion, joltageGoalNextRecursion);
                     if (tmpResult < Integer.MAX_VALUE && (tmpResult + c.buttonPressCount) < result)
                         result = faktor * tmpResult + c.buttonPressCount; // faktor ist hier 1
                 }
             }
+            if (!foundOdd) {
+                joltageGoal.replaceAll(g -> g / 2);
+                faktor *= 2;
+
+                // joltageGoalNextRecursion aus joltageGoal erstellen
+                List<Integer> joltageGoalNextRecursion = new ArrayList<>(joltageGoal);
+                System.out.println("--> Aufruf 2");
+                int tmpResult = getResult(switches, recursion, joltageGoalNextRecursion);
+                if (tmpResult < Integer.MAX_VALUE)
+                    result = faktor * tmpResult;
+            }
         } else {
             // joltageGoalNextRecursion aus joltageGoal erstellen
             List<Integer> joltageGoalNextRecursion = new ArrayList<>(joltageGoal);
-            System.out.println("--> Aufruf 2");
-            // Rekursiver Aufruf
-            int tmpResult = part2(joltageGoalNextRecursion, switches, recursion+1);
+            System.out.println("--> Aufruf 3");
+            int tmpResult = getResult(switches, recursion, joltageGoalNextRecursion);
             if (tmpResult < Integer.MAX_VALUE)
                 result = faktor * tmpResult;
         }
         return result;
+    }
+
+    private static int getResult(List<Integer> switches, int recursion, List<Integer> joltageGoalNextRecursion) {
+        int tmpResult;
+        String joltageGoalStringRepresentation = getJoltageGoalString(joltageGoalNextRecursion);
+        if (SOLUTIONS_CACHE.containsKey(joltageGoalStringRepresentation)) {
+            tmpResult = SOLUTIONS_CACHE.get(joltageGoalStringRepresentation);
+        } else {
+            // Rekursiver Aufruf
+            tmpResult = part2(joltageGoalNextRecursion, switches, recursion + 1);
+            SOLUTIONS_CACHE.put(joltageGoalStringRepresentation, tmpResult);
+        }
+        return tmpResult;
     }
 
     private static String printJoltageGoal(List<Integer> joltageGoal) {
@@ -185,6 +203,15 @@ public class Day10_Factory_Part2 {
             sb.append(" ,");
         }
         sb.append("] ");
+        return sb.toString();
+    }
+
+    private static String getJoltageGoalString(List<Integer> joltageGoal) {
+        StringBuilder sb = new StringBuilder();
+        for (int g : joltageGoal) {
+            sb.append(g);
+            sb.append(",");
+        }
         return sb.toString();
     }
 
