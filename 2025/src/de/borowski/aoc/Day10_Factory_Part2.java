@@ -17,8 +17,8 @@ public class Day10_Factory_Part2 {
 
         try {
             // reader = new BufferedReader(new FileReader("/home/christoph/Projects/IdeaProjects/AdventOfCode/2025/input/input_day10_testset.txt"));
-            // reader = new BufferedReader(new FileReader("/home/christoph/Projects/IdeaProjects/AdventOfCode/2025/input/input_day10.txt"));
-            reader = new BufferedReader(new FileReader("/home/christoph/Projects/IdeaProjects/AdventOfCode/2025/input/input_day10_test.txt"));
+            reader = new BufferedReader(new FileReader("/home/christoph/Projects/IdeaProjects/AdventOfCode/2025/input/input_day10.txt"));
+            // reader = new BufferedReader(new FileReader("/home/christoph/Projects/IdeaProjects/AdventOfCode/2025/input/input_day10_test.txt"));
 
             String line = reader.readLine();
 
@@ -102,18 +102,17 @@ public class Day10_Factory_Part2 {
             for (Integer g : joltageGoal) sb.append((g > 0) ? '#' : '.');
         }
 
-        Integer lightGoal = createBitMask(sb.toString());
-        combos = findAllPossiblePresses(lightGoal, switches);
-        System.out.println("-------------------------------------\nRekursion " + recursion + "\nPattern " + sb.toString() + " = " + printJoltageGoal(joltageGoal));
-        System.out.println("# Combos " + combos.size() + " : " + printCombos(combos));
+        combos = findAllPossiblePresses(createBitMask(sb.toString()), switches);
+        // System.out.println("-------------------------------------\nRekursion " + recursion + "\nPattern " + sb.toString() + " = " + printJoltageGoal(joltageGoal));
+        // System.out.println("# Combos " + combos.size() + " : " + printCombos(combos));
 
         if (combos.isEmpty()) {
             if (foundOdd) {
-                System.out.println(" -> max exit");
+                // System.out.println(" -> max exit");
                 return Integer.MAX_VALUE;
             } else {
                 // keine Lösung gefunden und alle Counter waren vorher gerade: alle gerade --> halbieren
-                System.out.println(" -> halbieren");
+                // System.out.println(" -> halbieren");
                 joltageGoal.replaceAll(g -> g / 2);
                 faktor *= 2;
             }
@@ -123,7 +122,7 @@ public class Day10_Factory_Part2 {
             // Es gibt Combos
             nextc:
             for (Combo c : combos) {
-                System.out.println("Rekursion " + recursion + " Processing combo (" + c.combo + "|" + c.buttonPressCount + ")");
+                // System.out.println("Rekursion " + recursion + " Processing combo (" + c.combo + "|" + c.buttonPressCount + ")");
                 // joltageGoalNextRecursion aus joltageGoal erstellen
                 List<Integer> joltageGoalNextRecursion = new ArrayList<>(joltageGoal);
                 // joltageGoalNextRecursion gemäß Combo c erniedrigen
@@ -135,7 +134,7 @@ public class Day10_Factory_Part2 {
                             if ((s & (1 << j)) > 0) {
                                 int ng = joltageGoalNextRecursion.get(j);
                                 if (ng == 0) {
-                                    System.out.println(" => 0 Wert = Abbruch");
+                                    // System.out.println(" => 0 Wert = Abbruch");
                                     continue nextc;
                                 }
                                 joltageGoalNextRecursion.set(j, ng - 1);
@@ -154,7 +153,7 @@ public class Day10_Factory_Part2 {
                     if (c.buttonPressCount < result)
                         result = c.buttonPressCount;
                 } else {
-                    System.out.println("--> Aufruf 1");
+                    // System.out.println("--> Aufruf 1");
                     int tmpResult = getResult(switches, recursion, joltageGoalNextRecursion);
                     if (tmpResult < Integer.MAX_VALUE && (tmpResult + c.buttonPressCount) < result)
                         result = faktor * tmpResult + c.buttonPressCount; // faktor ist hier 1
@@ -166,7 +165,7 @@ public class Day10_Factory_Part2 {
 
                 // joltageGoalNextRecursion aus joltageGoal erstellen
                 List<Integer> joltageGoalNextRecursion = new ArrayList<>(joltageGoal);
-                System.out.println("--> Aufruf 2");
+                // System.out.println("--> Aufruf 2");
                 int tmpResult = getResult(switches, recursion, joltageGoalNextRecursion);
                 if (tmpResult < Integer.MAX_VALUE)
                     result = faktor * tmpResult;
@@ -174,7 +173,7 @@ public class Day10_Factory_Part2 {
         } else {
             // joltageGoalNextRecursion aus joltageGoal erstellen
             List<Integer> joltageGoalNextRecursion = new ArrayList<>(joltageGoal);
-            System.out.println("--> Aufruf 3");
+            // System.out.println("--> Aufruf 3");
             int tmpResult = getResult(switches, recursion, joltageGoalNextRecursion);
             if (tmpResult < Integer.MAX_VALUE)
                 result = faktor * tmpResult;
@@ -202,6 +201,7 @@ public class Day10_Factory_Part2 {
             sb.append(g);
             sb.append(" ,");
         }
+        sb.delete(sb.length()-2, sb.length());
         sb.append("] ");
         return sb.toString();
     }
@@ -243,34 +243,38 @@ public class Day10_Factory_Part2 {
         return minFewestTotalPresses;
     }
 
+    private static List<Combo> getAllPresses(List<Integer> joltageGoal, List<Integer> encodedSwitches) {
+        List<Combo> allPresses = new ArrayList<>();
+        int size = encodedSwitches.size();
+        double pow = Math.pow(2, size);
+        for (int comb = 1; comb < pow; comb++) {
+            int buttonPressCount = 0;
+            for (int i = 0; i< size; i++) {
+                if ((comb & (1 << i)) > 0) buttonPressCount++;
+            }
+            allPresses.add(new Combo(comb, buttonPressCount));
+        }
+        return allPresses;
+    }
+
     private static List<Combo> findAllPossiblePresses(Integer lightGoal, List<Integer> encodedSwitches) {
         List<Combo> allPossiblePresses = new ArrayList<>();
-        double pow = Math.pow(2, encodedSwitches.size());
+        int size = encodedSwitches.size();
+        double pow = Math.pow(2, size);
         for (int comb = 1; comb <= pow; comb++) {
             int buttonPressCount = 0;
             int mask = 0;
-            for (int i=0; i<encodedSwitches.size(); i++) {
+            for (int i = 0; i< size; i++) {
                 if ((comb & (1 << i)) > 0) {
                     mask = mask ^ encodedSwitches.get(i);
                     buttonPressCount++;
                 }
             }
-            // 1.
             if (lightGoal == mask) {
                 allPossiblePresses.add(new Combo(comb, buttonPressCount));
             }
-            // 2.
-            /* boolean useMask = true;
-            for (int i = 0; i < encodedSwitches.size(); i++) {
-                if ((lightGoal & (1 << i)) > 0 && (mask & (1 << i)) == 0) {
-                    useMask = false;
-                }
-            }
-            if (useMask) {
-                allPossiblePresses.add(new Combo(comb, buttonPressCount));
-            }*/
         }
-        // Sort
+        // Sortieren nach der Anzahl der Button Press aufsteigend
         allPossiblePresses = allPossiblePresses.stream().sorted(Comparator.comparingInt(Combo::buttonPressCount)).toList();
         return allPossiblePresses;
     }
